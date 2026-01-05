@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Resume Matcher</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Custom Styles -->
+    <style>
+        /* Modern Color Palette */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            --warning-gradient: linear-gradient(135deg, #fce38a 0%, #f38181 100%);
+            --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            
+            --bg-primary: #0f0f23;
+            --bg-secondary: #1a1a2e;
+            --bg-card: #16213e;
+            --bg-glass: rgba(255, 255, 255, 0.1);
+            --text-primary: #ffffff;
+            --text-secondary: #b8c1ec;
+            --text-muted: #8892b0;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --shadow-primary: rgba(102, 126, 234, 0.4);
+            --shadow-secondary: rgba(0, 0, 0, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(102, 126, 234, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(118, 75, 162, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 80%, rgba(79, 172, 254, 0.2) 0%, transparent 50%);
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism Container */
+        .glass-container {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px var(--shadow-secondary);
+        }
+
+        /* Header Styles */
+        .hero-section {
+            text-align: center;
+            padding: 80px 20px 60px;
+            position: relative;
+        }
+
+        .hero-icon {
+            font-size: 4rem;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 24px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-subtitle {
+            font-size: 1.3rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto 40px;
+            line-height: 1.6;
+        }
+
+        /* Main Layout */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Brick Layout */
+        .upload-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .upload-section {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 32px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px var(--shadow-secondary);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .upload-section:hover::before {
+            transform: scaleX(1);
+        }
+
+        .upload-section:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px var(--shadow-secondary);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .section-description {
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+        }
+
+        /* Modern File Upload */
+        .file-upload-zone {
+            border: 2px dashed var(--border-color);
+            border-radius: 16px;
+            padding: 32px 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: var(--bg-glass);
+            position: relative;
+            cursor: pointer;
+            margin-bottom: 16px;
+        }
+
+        .file-upload-zone:hover {
+            border-color: rgba(102, 126, 234, 0.5);
+            background: rgba(102, 126, 234, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .file-upload-zone.drag-over {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.2);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload-zone:hover .upload-icon {
+            color: #667eea;
+            transform: scale(1.1);
+        }
+
+        .upload-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .upload-subtext {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .file-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* File Preview */
+        .file-preview {
+            background: var(--bg-glass);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 12px;
+            border: 1px solid var(--border-color);
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        .file-preview.show {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .file-icon {
+            font-size: 1.5rem;
+            color: #667eea;
+        }
+
+        .file-info {
+            flex: 1;
+        }
+
+        .file-name {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .file-size {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .remove-file {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: color 0.3s ease;
+        }
+
+        .remove-file:hover {
+            color: #f5576c;
+        }
+
+        /* Resume Upload Grid */
+        .resume-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .resume-upload-card {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .resume-upload-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px var(--shadow-secondary);
+        }
+
+        .resume-number {
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            background: var(--primary-gradient);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* Modern Button */
+        .analyze-btn {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 50px;
+            padding: 18px 48px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            margin-top: 40px;
+        }
+
+        .analyze-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .analyze-btn:hover::before {
+            left: 100%;
+        }
+
+        .analyze-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
+        }
+
+        .analyze-btn:disabled {
+            background: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Results Section */
+        .results-container {
+            margin-top: 80px;
+            display: none;
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .results-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            background: var(--success-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 16px;
+        }
+
+        /* Ranking Cards */
+        .ranking-container {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px var(--shadow-secondary);
+        }
+
+        .ranking-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 32px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            background: var(--bg-glass);
+            border-radius: 16px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            animation: slideInUp 0.6s ease forwards;
+            opacity: 0;
+        }
+
+        .ranking-item:hover {
+            transform: translateX(8px);
+            box-shadow: 0 8px 24px var(--shadow-secondary);
+        }
+
+        .rank-badge {
+            background: var(--primary-gradient);
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-right: 20px;
+        }
+
+        .rank-info {
+            flex: 1;
+        }
+
+        .rank-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .rank-score {
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--success-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Detailed Analysis */
+        .analysis-grid {
+            display: grid;
+            gap: 32px;
+        }
+
+        .resume-analysis-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 32px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 32px var(--shadow-secondary);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.8s ease forwards;
+            opacity: 0;
+        }
+
+        .resume-analysis-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px var(--shadow-secondary);
+        }
+
+        .analysis-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .resume-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            flex: 1;
+        }
+
+        .score-badge {
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+
+        .score-excellent {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .score-good {
+            background: var(--warning-gradient);
+            color: white;
+        }
+
+        .score-poor {
+            background: var(--secondary-gradient);
+            color: white;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-bottom: 24px;
+        }
+
+        .progress-bar-modern {
+            width: 100%;
+            height: 12px;
+            background: var(--bg-glass);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background-image: linear-gradient(
+                -45deg,
+                rgba(255, 255, 255, 0.2) 25%,
+                transparent 25%,
+                transparent 50%,
+                rgba(255, 255, 255, 0.2) 50%,
+                rgba(255, 255, 255, 0.2) 75%,
+                transparent 75%,
+                transparent
+            );
+            background-size: 50px 50px;
+            animation: move 2s linear infinite;
+        }
+
+        .progress-excellent { background: var(--success-gradient); }
+        .progress-good { background: var(--warning-gradient); }
+        .progress-poor { background: var(--secondary-gradient); }
+
+        /* Keywords Section */
+        .keywords-section {
+            margin-top: 24px;
+        }
+
+        .keywords-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .keywords-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .keyword-tag {
+            background: var(--bg-glass);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            animation: popIn 0.5s ease forwards;
+            opacity: 0;
+            transform: scale(0.8);
+        }
+
+        .keyword-tag:hover {
+            background: var(--primary-gradient);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Loading States */
+        .loading-spinner {
+            width: 24px;
+            height: 24px;
+            border: 2px solid var(--border-color);
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 12px;
+        }
+
+        /* Animations */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes slideIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        @keyframes slideInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(40px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        @keyframes popIn {
+            from { 
+                opacity: 0; 
+                transform: scale(0.8); 
+            }
+            to { 
+                opacity: 1; 
+                transform: scale(1); 
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes move {
+            0% { background-position: 0 0; }
+            100% { background-position: 50px 50px; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .upload-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+            
+            .hero-title {
+                font-size: 2.8rem;
+            }
+            
+            .resume-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.2rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.1rem;
+            }
+            
+            .upload-section {
+                padding: 24px;
+            }
+            
+            .file-upload-zone {
+                padding: 24px 16px;
+            }
+            
+            .analyze-btn {
+                padding: 16px 36px;
+                font-size: 1.1rem;
+            }
+            
+            .resume-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .analysis-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        /* Dark theme enhancements */
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-icon">
+            <i class="bi bi-robot"></i>
+        </div>
+        <h1 class="hero-title">AI Resume Matcher</h1>
+        <p class="hero-subtitle">Advanced AI-powered resume analysis with semantic matching and intelligent keyword extraction</p>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <form id="matchForm" enctype="multipart/form-data" class="needs-validation" novalidate>
+            {% csrf_token %}
+            
+            <!-- Upload Grid Layout -->
+            <div class="upload-grid">
+                <!-- Job Description Section -->
+                <div class="upload-section glass-container">
+                    <h3 class="section-title">
+                        <i class="bi bi-briefcase-fill"></i> Job Description
+                    </h3>
+                    <p class="section-description">Upload the job description to analyze against resumes</p>
+                    
+                    <div class="file-upload-zone" id="jdUploadZone">
+                        <input type="file" id="jdFile" name="jd" class="file-input" accept=".pdf,.docx,.txt,.png,.jpg" required>
+                        <div class="upload-icon">
+                            <i class="bi bi-cloud-arrow-up"></i>
+                        </div>
+                        <div class="upload-text">Drop your job description here</div>
+                        <div class="upload-subtext">or click to browse (PDF, DOCX, TXT, PNG, JPG)</div>
+                    </div>
+                    <div class="file-preview" id="jdPreview"></div>
+                </div>
+
+                <!-- Resumes Section -->
+                <div class="upload-section glass-container">
+                    <h3 class="section-title">
+                        <i class="bi bi-file-earmark-person"></i> Candidate Resumes
+                    </h3>
+                    <p class="section-description">Upload up to 5 resumes for comprehensive analysis and ranking</p>
+                    
+                    <div class="resume-grid" id="resumeGrid">
+                        <!-- Resume slots will be generated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analyze Button -->
+            <button type="submit" class="analyze-btn">
+                <i class="bi bi-magic"></i>
+                <span>Analyze & Rank Resumes</span>
+            </button>
+        </form>
+
+        <!-- Results Container -->
+        <div class="results-container" id="resultsContainer">
+            <!-- Results Header -->
+            <div class="results-header">
+                <h2 class="results-title">
+                    <i class="bi bi-trophy"></i> Analysis Results
+                </h2>
+            </div>
+
+            <!-- Ranking Section -->
+            <div class="ranking-container glass-container" id="rankingContainer">
+                <h3 class="ranking-title">Resume Rankings</h3>
+                <div id="rankingList"></div>
+            </div>
+
+            <!-- Detailed Analysis -->
+            <div class="analysis-grid" id="analysisGrid"></div>
+        </div>
+
+        <!-- Error Alert -->
+        <div id="errorAlert" class="alert alert-danger" style="display: none;"></div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Modern JavaScript for enhanced UI interactions
+        class ResumeAnalyzer {
+            constructor() {
+                this.resumeSlots = 5;
+                this.uploadedFiles = {
+                    jd: null,
+                    resumes: []
+                };
+                this.init();
+            }
+
+            init() {
+                this.createResumeSlots();
+                this.setupEventListeners();
+                this.setupDragAndDrop();
+            }
+
+            createResumeSlots() {
+                const resumeGrid = document.getElementById('resumeGrid');
+                
+                for (let i = 1; i <= this.resumeSlots; i++) {
+                    const slotHTML = `
+                        <div class="resume-upload-card" data-slot="${i}">
+                            <div class="resume-number">${i}</div>
+                            <div class="file-upload-zone" id="resumeUploadZone${i}">
+                                <input type="file" id="resumeFile${i}" name="resume${i}" 
+                                       class="file-input" accept=".pdf,.docx,.txt,.png,.jpg">
+                                <div class="upload-icon">
+                                    <i class="bi bi-file-earmark-plus"></i>
+                                </div>
+                                <div class="upload-text">Resume ${i}</div>
+                                <div class="upload-subtext">Drop file or click to browse</div>
+                            </div>
+                            <div class="file-preview" id="resumePreview${i}"></div>
+                        </div>
+                    `;
+                    resumeGrid.insertAdjacentHTML('beforeend', slotHTML);
+                }
+            }
+
+            setupEventListeners() {
+                // Job description file input
+                document.getElementById('jdFile').addEventListener('change', (e) => {
+                    this.handleFileSelect(e, 'jd');
+                });
+
+                // Resume file inputs
+                for (let i = 1; i <= this.resumeSlots; i++) {
+                    document.getElementById(`resumeFile${i}`).addEventListener('change', (e) => {
+                        this.handleFileSelect(e, 'resume', i);
+                    });
+                }
+
+                // Form submission
+                document.getElementById('matchForm').addEventListener('submit', (e) => {
+                    this.handleFormSubmit(e);
+                });
+            }
+
+            setupDragAndDrop() {
+                // JD drag and drop
+                const jdZone = document.getElementById('jdUploadZone');
+                this.setupDropZone(jdZone, 'jd');
+
+                // Resume drag and drop
+                for (let i = 1; i <= this.resumeSlots; i++) {
+                    const resumeZone = document.getElementById(`resumeUploadZone${i}`);
+                    this.setupDropZone(resumeZone, 'resume', i);
+                }
+            }
+
+            setupDropZone(zone, type, index = null) {
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    zone.classList.add('drag-over');
+                });
+
+                zone.addEventListener('dragleave', (e) => {
+                    e.preventDefault();
+                    zone.classList.remove('drag-over');
+                });
+
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    zone.classList.remove('drag-over');
+                    
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        const input = type === 'jd' ? 
+                            document.getElementById('jdFile') : 
+                            document.getElementById(`resumeFile${index}`);
+                        
+                        input.files = files;
+                        this.handleFileSelect({ target: input }, type, index);
+                    }
+                });
+            }
+
+            handleFileSelect(event, type, index = null) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const fileInfo = {
+                    name: file.name,
+                    size: this.formatFileSize(file.size),
+                    type: file.type
+                };
+
+                if (type === 'jd') {
+                    this.uploadedFiles.jd = fileInfo;
+                    this.showFilePreview('jdPreview', fileInfo, () => {
+                        this.removeFile('jd');
+                    });
+                } else {
+                    this.uploadedFiles.resumes[index - 1] = fileInfo;
+                    this.showFilePreview(`resumePreview${index}`, fileInfo, () => {
+                        this.removeFile('resume', index);
+                    });
+                }
+            }
+
+            showFilePreview(previewId, fileInfo, removeCallback) {
+                const preview = document.getElementById(previewId);
+                preview.innerHTML = `
+                    <div class="file-icon">
+                        <i class="bi bi-file-earmark-check"></i>
+                    </div>
+                    <div class="file-info">
+                        <div class="file-name">${fileInfo.name}</div>
+                        <div class="file-size">${fileInfo.size}</div>
+                    </div>
+                    <button type="button" class="remove-file" onclick="this.parentElement.style.display='none'; (${removeCallback})()">
+                        <i class="bi bi-x-circle"></i>
+                    </button>
+                `;
+                preview.classList.add('show');
+            }
+
+            removeFile(type, index = null) {
+                if (type === 'jd') {
+                    this.uploadedFiles.jd = null;
+                    document.getElementById('jdFile').value = '';
+                    document.getElementById('jdPreview').classList.remove('show');
+                } else {
+                    this.uploadedFiles.resumes[index - 1] = null;
+                    document.getElementById(`resumeFile${index}`).value = '';
+                    document.getElementById(`resumePreview${index}`).classList.remove('show');
+                }
+            }
+
+            formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            async handleFormSubmit(event) {
+                event.preventDefault();
+                
+                // Validate form
+                if (!this.validateForm()) return;
+
+                const form = event.target;
+                const formData = new FormData(form);
+                
+                // Show loading state
+                this.setLoadingState(true);
+                
+                try {
+                    const response = await fetch('/multi-match/', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const data = await response.json();
+
+                    if (data.error) {
+                        this.showError(data.error);
+                    } else {
+                        this.displayResults(data.results);
+                    }
+                } catch (error) {
+                    this.showError(`Network error: ${error.message}`);
+                } finally {
+                    this.setLoadingState(false);
+                }
+            }
+
+            validateForm() {
+                // Check if JD is uploaded
+                if (!this.uploadedFiles.jd) {
+                    this.showError('Please upload a job description file.');
+                    return false;
+                }
+
+                // Check if at least one resume is uploaded
+                const hasResume = this.uploadedFiles.resumes.some(resume => resume !== null && resume !== undefined);
+                if (!hasResume) {
+                    this.showError('Please upload at least one resume file.');
+                    return false;
+                }
+
+                return true;
+            }
+
+            setLoadingState(loading) {
+                const button = document.querySelector('.analyze-btn');
+                const icon = button.querySelector('i');
+                const span = button.querySelector('span');
+                
+                if (loading) {
+                    button.disabled = true;
+                    icon.className = 'loading-spinner';
+                    span.textContent = 'Analyzing Resumes...';
+                } else {
+                    button.disabled = false;
+                    icon.className = 'bi bi-magic';
+                    span.textContent = 'Analyze & Rank Resumes';
+                }
+            }
+
+            showError(message) {
+                const errorAlert = document.getElementById('errorAlert');
+                errorAlert.textContent = message;
+                errorAlert.style.display = 'block';
+                errorAlert.scrollIntoView({ behavior: 'smooth' });
+                
+                // Hide error after 5 seconds
+                setTimeout(() => {
+                    errorAlert.style.display = 'none';
+                }, 5000);
+            }
+
+            displayResults(results) {
+                // Hide error alert
+                document.getElementById('errorAlert').style.display = 'none';
+                
+                // Show results container
+                const resultsContainer = document.getElementById('resultsContainer');
+                resultsContainer.style.display = 'block';
+                
+                // Display ranking
+                this.displayRanking(results);
+                
+                // Display detailed analysis
+                this.displayDetailedAnalysis(results);
+                
+                // Scroll to results
+                resultsContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+
+            displayRanking(results) {
+                const rankingList = document.getElementById('rankingList');
+                rankingList.innerHTML = '';
+                
+                results.forEach((result, index) => {
+                    const rankItem = document.createElement('div');
+                    rankItem.className = 'ranking-item';
+                    rankItem.style.animationDelay = `${index * 0.1}s`;
+                    
+                    rankItem.innerHTML = `
+                        <div class="rank-badge">#${index + 1}</div>
+                        <div class="rank-info">
+                            <div class="rank-name">${result.resume_name}</div>
+                        </div>
+                        <div class="rank-score">${result.score}%</div>
+                    `;
+                    
+                    rankingList.appendChild(rankItem);
+                });
+            }
+
+            displayDetailedAnalysis(results) {
+                const analysisGrid = document.getElementById('analysisGrid');
+                analysisGrid.innerHTML = '';
+                
+                results.forEach((result, index) => {
+                    const scoreClass = result.score >= 70 ? 'excellent' : 
+                                     result.score >= 50 ? 'good' : 'poor';
+                    const badgeClass = result.score >= 70 ? 'score-excellent' : 
+                                     result.score >= 50 ? 'score-good' : 'score-poor';
+                    
+                    const card = document.createElement('div');
+                    card.className = 'resume-analysis-card';
+                    card.style.animationDelay = `${index * 0.2}s`;
+                    
+                    const keywords = result.matched_keywords || [];
+                    const keywordTags = keywords.map((keyword, i) => 
+                        `<span class="keyword-tag" style="animation-delay: ${i * 0.1}s">${keyword}</span>`
+                    ).join('');
+                    
+                    card.innerHTML = `
+                        <div class="analysis-header">
+                            <h4 class="resume-title">${result.resume_name}</h4>
+                            <div class="score-badge ${badgeClass}">${result.score}%</div>
+                        </div>
+                        
+                        <div class="progress-container">
+                            <div class="progress-bar-modern">
+                                <div class="progress-fill progress-${scoreClass}" 
+                                     style="width: 0%; animation-delay: ${index * 0.3}s"
+                                     data-width="${result.score}%">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        ${keywords.length > 0 ? `
+                            <div class="keywords-section">
+                                <h5 class="keywords-title">
+                                    <i class="bi bi-tags"></i>
+                                    Matched Keywords (${keywords.length})
+                                </h5>
+                                <div class="keywords-grid">
+                                    ${keywordTags}
+                                </div>
+                            </div>
+                        ` : ''}
+                    `;
+                    
+                    analysisGrid.appendChild(card);
+                    
+                    // Animate progress bar
+                    setTimeout(() => {
+                        const progressFill = card.querySelector('.progress-fill');
+                        progressFill.style.width = progressFill.dataset.width;
+                    }, 500 + (index * 200));
+                });
+            }
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            new ResumeAnalyzer();
+        });
+    </script>
+</body>
+</html>

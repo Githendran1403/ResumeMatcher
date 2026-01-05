@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resume-JD Matcher</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <!-- Custom Styles -->
+    <style>
+        /* Color Palette */
+        :root {
+            --primary-blue: #1A5276; /* Deeper, more sophisticated blue */
+            --secondary-blue: #3498DB; /* Classic vibrant blue */
+            --accent-blue: #5DADE2; /* Lighter blue for highlights */
+            --background-light: #EBF5FB; /* Very light blue/off-white background */
+            --card-background: #FFFFFF; /* Pure white for cards */
+            --text-dark: #2C3E50; /* Dark charcoal for primary text */
+            --text-muted: #7F8C8D; /* Muted grey for secondary text */
+            --border-color: #D5DBDB; /* Light grey for borders */
+            --shadow-light: rgba(0, 0, 0, 0.08); /* Lighter shadow */
+            --shadow-medium: rgba(0, 0, 0, 0.15); /* Medium shadow */
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column; /* Allow content to stack vertically */
+            align-items: center;
+            justify-content: center;
+            padding: 20px; /* Overall padding */
+            box-sizing: border-box;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+            color: var(--text-dark);
+        }
+
+        /* Main App Wrapper */
+        .app-wrapper {
+            background: var(--card-background);            border-radius: 15px;
+            box-shadow: 0 20px 40px var(--shadow-medium);
+            padding: 40px; /* Generous padding */
+            width: 100%;
+            max-width: 900px; /* Wider main container */
+            margin: auto; /* Center it */
+            transform: translateY(0); /* Initial state for animation */
+            opacity: 1; /* Initial state for animation */
+            animation: fadeInScale 0.8s ease-out forwards;
+        }
+
+        /* Header */
+        .app-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .app-header h1 {
+            color: var(--primary-blue);
+            font-weight: 700;
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+        }
+        .app-header p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .app-header .bi {
+            font-size: 4rem;
+            color: var(--accent-blue);
+            margin-bottom: 15px;
+        }
+
+        /* Form Styling */
+        .form-section {
+            margin-bottom: 40px;
+        }
+        .form-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+            display: block; /* Ensure label is on its own line */
+        }
+        .form-control {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 18px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .form-control:focus {
+            border-color: var(--secondary-blue);
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+            outline: none;
+        }
+
+        /* Custom File Input Look */
+        .custom-file-input-wrapper {
+            position: relative;
+            display: flex; /* Use flexbox for input and button */
+            align-items: center;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: var(--background-light); /* Light background for the file input area */
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        .custom-file-input-wrapper:hover {
+            border-color: var(--secondary-blue);
+            box-shadow: 0 0 0 0.25rem rgba(52, 152, 219, 0.25);
+        }
+        .custom-file-input-wrapper input[type="file"] {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            z-index: 2; /* Make sure it's clickable */
+        }
+        .custom-file-input-wrapper .file-display-name {
+            flex-grow: 1;
+            padding: 12px 18px;
+            color: var(--text-dark);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            background-color: var(--card-background); /* White background for text part */
+        }
+        .custom-file-input-wrapper .file-upload-button {
+            flex-shrink: 0;
+            background-color: var(--secondary-blue);
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 0 8px 8px 0; /* Only right side rounded */
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 1;
+        }
+        .custom-file-input-wrapper .file-upload-button:hover {
+            background-color: var(--primary-blue);
+        }
+
+        /* Submit Button */
+        .btn-submit {            background-color: var(--primary-blue);
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.3rem;
+            font-weight: 600;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            letter-spacing: 0.8px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+            color: white;
+            width: 100%;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .btn-submit:hover {
+            background-color: var(--secondary-blue);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.25);
+        }
+        .btn-submit:disabled {
+            background-color: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Results Section */
+        .results-section {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border-color);
+            animation: fadeIn 0.8s ease-out forwards;
+            opacity: 0; /* Start invisible for animation */
+        }
+        .results-section h2 {
+            font-size: 2.2rem;
+            margin-bottom: 30px;
+            color: var(--primary-blue);
+            text-align: center;
+        }
+
+        .score-display {
+            margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .score-card {
+            background-color: var(--background-light);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 5px 15px var(--shadow-light);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .score-card .score-label {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--text-dark);        }
+        .score-card .progress {
+            width: 100%;
+            height: 30px;
+            border-radius: 15px;
+            background-color: #e0e0e0;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .score-card .progress-bar {
+            height: 100%;
+            line-height: 30px;
+            font-weight: 600;
+            color: white;
+            text-align: center;
+            transition: width 0.8s ease-in-out;
+            border-radius: 15px;
+            background-color: var(--secondary-blue); /* Default */
+        }        /* No longer need .bar-semantic */
+        .score-card .progress-bar.bar-final { background-color: #fd7e14; } /* Orange */
+
+        /* No longer need .match-report-section or .report-item styles */
+
+        /* Error Alert */
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+            border-radius: 8px;
+            padding: 15px 20px;
+            font-size: 1rem;
+            margin-top: 30px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        /* Animations */
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            .app-wrapper {
+                padding: 25px;
+                border-radius: 10px;
+            }
+            .app-header h1 {
+                font-size: 2.2rem;
+            }
+            .app-header .bi {
+                font-size: 3.5rem;
+            }
+            .btn-submit {
+                font-size: 1.1rem;
+                padding: 12px 20px;
+            }
+            .results-section h2 {
+                font-size: 1.8rem;
+            }
+            .score-card {
+                padding: 20px;
+            }
+            .score-card .score-label {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-wrapper">
+        <header class="app-header">
+            <i class="bi bi-file-earmark-text-fill"></i>
+            <h1>Resume-Job Description Matcher</h1>
+            <p>Upload your resume and a job description to instantly find out how well you match the requirements.</p>
+        </header>
+
+        <form id="matchForm" enctype="multipart/form-data" class="form-section needs-validation" novalidate>
+            {% csrf_token %}
+            <!-- Resume Upload -->
+            <div class="mb-4">
+                <label for="resumeFile" class="form-label">Upload Resume (PDF, DOCX, TXT, PNG, JPG):</label>
+                <div class="custom-file-input-wrapper">
+                    <span class="file-display-name" id="resumeFileName">No file chosen</span>
+                    <input type="file" id="resumeFile" name="resume" 
+                           accept=".pdf,.docx,.txt,.png,.jpg" 
+                           required>
+                    <button type="button" class="file-upload-button">
+                        <i class="bi bi-cloud-arrow-up"></i> Browse
+                    </button>
+                </div>
+                <div class="invalid-feedback">
+                    Please upload a resume file (PDF, DOCX, TXT, PNG, or JPG).
+                </div>
+            </div>
+
+            <!-- Job Description Upload -->
+            <div class="mb-5">
+                <label for="jdFile" class="form-label">Upload Job Description (PDF, DOCX, TXT, PNG, JPG):</label>
+                <div class="custom-file-input-wrapper">
+                    <span class="file-display-name" id="jdFileName">No file chosen</span>
+                    <input type="file" id="jdFile" name="jd" 
+                           accept=".pdf,.docx,.txt,.png,.jpg" 
+                           required>
+                    <button type="button" class="file-upload-button">                        <i class="bi bi-cloud-arrow-up"></i> Browse
+                    </button>
+                </div>
+                <div class="invalid-feedback">
+                    Please upload a job description file (PDF, DOCX, TXT, PNG, or JPG).
+                </div>
+            </div>
+
+            <!-- Match Button -->
+            <button type="submit" class="btn btn-submit">
+                <i class="bi bi-robot"></i> Analyze & Match
+            </button>
+        </form>
+
+        <!-- Results Section (Hidden by default) -->
+        <div id="result" class="results-section" style="display: none;">
+            <h2>Match Results</h2>
+            <div class="score-display">
+                <!-- Final Score -->
+                <div class="score-card">
+                    <label class="score-label">Overall Match Score</label>
+                    <div class="progress">
+                        <div id="finalScoreBar" class="progress-bar bar-final" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">0%</div>
+                    </div>
+                </div>
+            </div>
+            <!-- Removed Per-Sentence Match Report section -->
+        </div>
+
+        <!-- Error Alert -->
+        <div id="errorAlert" class="alert alert-danger" style="display: none;"></div>
+    </div>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Form validation script
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                var forms = document.getElementsByClassName('needs-validation');
+                Array.prototype.filter.call(forms, function(form) {
+                    form.addEventListener('submit', function(event) {
+                        if (form.checkValidity() === false) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                        }
+                        form.classList.add('was-validated');
+                    }, false);                });
+            }, false);
+        })();
+
+        // Custom file input handling to display file name
+        document.getElementById('resumeFile').addEventListener('change', function() {
+            const fileName = this.files.length > 0 ? this.files[0].name : 'No file chosen';
+            document.getElementById('resumeFileName').textContent = fileName;
+        });
+        document.getElementById('jdFile').addEventListener('change', function() {
+            const fileName = this.files.length > 0 ? this.files[0].name : 'No file chosen';
+            document.getElementById('jdFileName').textContent = fileName;
+        });
+
+        // AJAX form submission and results display
+        document.getElementById('matchForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const errorAlert = document.getElementById('errorAlert');
+            const resultSection = document.getElementById('result');
+            // Removed semanticScoreBar and matchReportDiv declarations
+            const finalScoreBar = document.getElementById('finalScoreBar');
+
+            // Clear previous results and errors            errorAlert.style.display = 'none';
+            resultSection.style.display = 'none';
+            // Removed semanticScoreBar reset
+            finalScoreBar.style.width = '0%';
+            finalScoreBar.textContent = '0%';
+            finalScoreBar.setAttribute('aria-valuenow', 0);
+            // Removed matchReportDiv reset
+
+            if (!form.checkValidity()) {
+                form.classList.add('was-validated');
+                return;
+            }
+
+            const formData = new FormData(form);
+
+            // Disable button and show loading spinner
+            const submitButton = form.querySelector('button[type="submit"]');
+            const originalButtonHtml = submitButton.innerHTML;
+            submitButton.disabled = true;
+            submitButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Processing...`;
+
+            try {
+                const res = await fetch('/match/', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await res.json();
+
+                if (data.error) {
+                    errorAlert.textContent = `Error: ${data.error}`;
+                    errorAlert.style.display = 'block';
+                    return;
+                }
+
+                // Removed Semantic Score update logic
+
+                // Update Final Score
+                finalScoreBar.style.width = `${data.final_score}%`;
+                finalScoreBar.textContent = `${data.final_score}%`;
+                finalScoreBar.setAttribute('aria-valuenow', data.final_score);
+
+                // Removed Match Report update logic
+
+                resultSection.style.display = 'block'; // Show results section
+                resultSection.scrollIntoView({ behavior: 'smooth', block: 'start' }); // Scroll to results
+
+            } catch (error) {
+                console.error('Fetch error:', error);
+                errorAlert.textContent = `An unexpected error occurred: ${error.message}`;
+                errorAlert.style.display = 'block';
+            } finally {
+                // Re-enable button and reset text
+                submitButton.disabled = false;
+                submitButton.innerHTML = originalButtonHtml;            }
+        };
+    </script>
+</body>
+</html>
