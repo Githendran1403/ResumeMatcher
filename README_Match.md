@@ -14,13 +14,16 @@ Keyword extraction and matching
 Interactive UI with progress bars and rankings
 Real-time results with smooth animations
 How to Use
+
 1. Access the Multi-Resume Matcher
 http://localhost:8000/multi/
+
 2. Upload Files
 Job Description: Upload one JD file (required)
 Resumes: Upload 1-5 resume files
 Supported formats: PDF, DOCX, TXT, PNG, JPG
 At least one resume is required
+
 3. View Results
 Rankings: See resumes ranked by match percentage
 Detailed Analysis: View individual scores and matched keywords
@@ -40,8 +43,7 @@ POST /match/ - Analyze single resume
 Multi-Resume (NEW)
 GET /multi/ - Multi-upload form
 POST /multi-match/ - Analyze multiple resumes
-Dependencies
-Make sure you have installed:
+Dependencies.
 
 pip install nltk
 Run once to download NLTK data:
@@ -66,33 +68,45 @@ Response Format (Multi-Resume)
     }
   ]
 }
+
+
 Features in Detail
+
 🏆 Ranking System
 Resumes are automatically ranked by match percentage
 Visual indicators for performance levels:
 Green (70%+): Excellent match
 Yellow (50-69%): Good match
 Red (<50%): Poor match
+
+
 🔍 Keyword Analysis
 Extracts common keywords between resume and JD
 Includes domain-specific technology keywords
 Shows top 10 matched keywords per resume
 Uses NLTK for advanced text processing
+
+
 💫 Enhanced UI
 Modern Bootstrap 5 design
 Smooth animations and transitions
 Responsive for mobile devices
 Loading states and error handling
+
 Usage Tips
 Quality: Ensure resume files have clear, readable text
 Format: PDF and DOCX work best for text extraction
 Content: More detailed resumes typically get better analysis
 JD Length: Longer job descriptions provide better matching context
+
 Troubleshooting
+
 Common Issues
 "Too little meaningful content": File may be corrupted or have insufficient text
 NLTK errors: Run python download_nltk_data.py to fix missing data
 Model loading slow: First load takes time due to Sentence-BERT initialization
+
+
 Performance Notes
 First request may take 30-60 seconds (model loading)
 Subsequent requests are much faster
